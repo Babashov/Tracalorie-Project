@@ -1,9 +1,9 @@
 // Storage Controller
 // Item Controller
-const ItemCtrl = (function(id,name,calories){
+const ItemCtrl = (function(){
   
   // Controller
-  const Item = function(){
+  const Item = function(id,name,calories){
     this.id = id;
     this.name = name;
     this.calories = calories;
@@ -26,6 +26,21 @@ const ItemCtrl = (function(id,name,calories){
     },
     logData:function(){
       return data;
+    },
+    addItem:function(name,calories){
+      let ID;
+      if(data.items.length > 0)
+      {
+        ID = data.items[data.items.length - 1].id + 1;
+      }else{
+        ID = 0;
+      }
+      // Parse To Int $calories
+      calories = parseInt(calories);
+      // Creating New Item Object
+      const newItem = new Item(ID,name,calories);
+      // Pushing newItem Object To data.items
+      data.items.push(newItem);
     }
   }
 
@@ -35,7 +50,10 @@ const UICtrl = (function(){
   
   // UI Selectors
   UiSelectors = {
-    itemList: 'item-list'
+    itemList: '#item-list',
+    addBtn:'.add-button',
+    itemName:'#item-name',
+    itemCalories:'#item-calories'
   }
 
   // Public methods
@@ -51,18 +69,46 @@ const UICtrl = (function(){
         `;
       });
 
-      document.getElementById(UiSelectors.itemList).innerHTML = html;
+      document.querySelector(UiSelectors.itemList).innerHTML = html;
+    },
+    getItemInput:function(){
+      
+      return {
+        name:document.querySelector(UiSelectors.itemName).value,
+        calories:document.querySelector(UiSelectors.itemCalories).value
+      }
+    },
+    getSelectors:function(){
+      return UiSelectors;
     }
   }
 })();
 // App Controller
 const App = (function(ItemCtrl,UICtrl){
+  // Load Event Listeners
+  const loadEventListeners = function(){
+  
+  // Get UI Selectors
+  const UiSelectors = UICtrl.getSelectors();
+  document.querySelector(UiSelectors.addBtn).addEventListener('click',itemAddSubmit);
+  }
+  const itemAddSubmit = function(e){
+
+    const input = UICtrl.getItemInput();
+    if(input.name !== '' && input.calories !== '')
+    {
+      ItemCtrl.addItem(input.name,input.calories);
+    }
+    e.preventDefault();
+  }
 return {
   init:function(){
     // Get Items
     const items = ItemCtrl.getItems();
     // Add Items To UI
     UICtrl.populateItemList(items);
+    // Loading Event Listeners
+    loadEventListeners();
   }
 }
 })(ItemCtrl,UICtrl);
